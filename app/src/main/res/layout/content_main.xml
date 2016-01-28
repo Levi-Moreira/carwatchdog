@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.example.levi.watchdog.MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="16dp"
+        android:id="@+id/linearLayout">
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:text="@string/button_start_watch"
+            android:textColor="@color/textWhite"
+            android:id="@+id/button_start_watch"
+            android:background="@color/buttonStartColor"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:text="@string/button_pause_watch"
+            android:id="@+id/button_pause_watch"
+            android:background="@color/buttonPauseColor"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:text="@string/button_stop_watch"
+            android:id="@+id/button_stop_watch"
+            android:background="@color/buttonStopColor"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_below="@+id/linearLayout"
+        android:text="@string/result_tv_message" />
+</RelativeLayout>
