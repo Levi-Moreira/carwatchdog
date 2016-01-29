@@ -7,4 +7,5 @@
     <color name="buttonPauseColor">#fff000</color>
     <color name="buttonStopColor">#ff0800</color>
     <color name="textWhite">#ffffff</color>
+    <color name="disabledButton">#949494</color>
 </resources>

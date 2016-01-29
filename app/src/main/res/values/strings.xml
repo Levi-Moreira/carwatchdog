@@ -5,4 +5,12 @@
     <string name="button_pause_watch">Pause Watch</string>
     <string name="button_stop_watch">Stop Watch</string>
     <string name="result_tv_message">See Warnings and Results Here</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <string name="pref_setting_password_title">App Password</string>
+    <string name="pref_setting_password_default">12345</string>
+    <string name="password_pref_key">password_pref</string>
+
 </resources>
