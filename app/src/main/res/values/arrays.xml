@@ -1,2 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string-array name="pref_setting_contact_entries">
+        <item>SMS</item>
+        <item>Phone</item>
+    </string-array>
+
+    <string-array name="pref_setting_contact_values">
+        <item>sms</item>
+        <item>phone</item>
+    </string-array>
+
+</resources>

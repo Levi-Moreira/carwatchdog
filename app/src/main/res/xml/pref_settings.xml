@@ -8,7 +8,19 @@
         android:key="@string/password_pref_key"
         android:title="@string/pref_setting_password_title"
         android:inputType="text"
-        android:singleLine="true"/>/>
+        android:singleLine="true"/>
+    <EditTextPreference
+        android:defaultValue="@string/pref_setting_phone_default"
+        android:key="@string/phone_pref_key"
+        android:title="@string/pref_setting_phone_title"
+        android:inputType="text"
+        android:singleLine="true"/>
 
-
+    <ListPreference
+        android:key="pref_syncConnectionType"
+        android:title="@string/pref_setting_contact_title"
+        android:dialogTitle="@string/pref_setting_contact_title"
+        android:entries="@array/pref_setting_contact_entries"
+        android:entryValues="@array/pref_setting_contact_values"
+        android:defaultValue="@string/pref_setting_contact_default" />
 </PreferenceScreen>

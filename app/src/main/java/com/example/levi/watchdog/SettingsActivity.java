@@ -5,14 +5,17 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.ListPreference;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.preference.ListPreference;
+import android.support.v7.preference.Preference;
 import android.support.v4.app.Fragment;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 
 /**
- * A {@link PreferenceActivity} that presents a set of application settings. On
+ * A that presents a set of application settings. On
  * handset devices, settings are presented as a single list. On tablets,
  * settings are split by category, with category headers shown to the left of
  * the list of settings.
@@ -40,8 +43,18 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState == null) {
+            // Create the fragment only when the activity is created for the first time.
+            // ie. not after orientation changes
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
+            if (fragment == null) {
+                fragment = new SettingsFragment();
+            }
 
-
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(android.R.id.content, fragment, SettingsFragment.FRAGMENT_TAG);
+            ft.commit();
+        }
     }
 
 
@@ -52,13 +65,14 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+        public static final String FRAGMENT_TAG = "my_preference_fragment";
 
         @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
+        public void onCreatePreferences(Bundle bundle, String s) {
             addPreferencesFromResource(R.xml.pref_settings);
             bindPreferenceSummaryToValue(findPreference(getString(R.string.password_pref_key)));
-
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.phone_pref_key)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.contact_pref_key)));
         }
 
 
@@ -72,9 +86,10 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
 
+
         @Override
-        public boolean onPreferenceChange(Preference preference, Object value) {
-            String stringValue = value.toString();
+        public boolean onPreferenceChange (Preference preference, Object o) {
+            String stringValue = o.toString();
 
             if (preference instanceof ListPreference) {
                 // For list preferences, look up the correct display value in

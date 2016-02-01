@@ -13,4 +13,30 @@
     <string name="pref_setting_password_default">12345</string>
     <string name="password_pref_key">password_pref</string>
 
+    <string name="pref_setting_phone_title">Owners Phone</string>
+    <string name="pref_setting_phone_default">+5585986955418</string>
+    <string name="phone_pref_key">phone_pref</string>
+
+    <string name="pref_setting_contact_title">Contact Method</string>
+    <string name="pref_setting_contact_default">SMS</string>
+    <string name="contact_pref_key">contact_pref</string>
+
+    <string name="pref_setting_sensor_title">Sensor Sensibility</string>
+    <string name="pref_setting_sensor_default">+5585986955418</string>
+    <string name="sensor_pref_key">sensor_pref</string>
+
+
+    <!--Strings related to settings panel-->
+    <string name="device_title">Connected Device</string>
+    <string name="phone_title">Owners Phone</string>
+    <string name="contact_title">Prefered Contact Method</string>
+    <string name="sensor_title">Sensor Sensibility</string>
+    <string name="help_title">Help</string>
+    <string name="save_button">Save</string>
+    <string name="connect_button">Connect</string>
+    <string name="rb_phone">Phone</string>
+    <string name="rb_sms">SMS</string>
+    <string name="drawer_open">Open Settings</string>
+    <string name="drawer_close">Close Settings</string>
+
 </resources>
