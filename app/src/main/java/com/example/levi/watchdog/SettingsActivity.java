@@ -73,6 +73,7 @@ public class SettingsActivity extends AppCompatActivity {
             bindPreferenceSummaryToValue(findPreference(getString(R.string.password_pref_key)));
             bindPreferenceSummaryToValue(findPreference(getString(R.string.phone_pref_key)));
             bindPreferenceSummaryToValue(findPreference(getString(R.string.contact_pref_key)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.sensor_pref_key)));
         }
 
 

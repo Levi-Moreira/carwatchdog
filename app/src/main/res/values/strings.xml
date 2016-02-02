@@ -22,7 +22,7 @@
     <string name="contact_pref_key">contact_pref</string>
 
     <string name="pref_setting_sensor_title">Sensor Sensibility</string>
-    <string name="pref_setting_sensor_default">+5585986955418</string>
+    <string name="pref_setting_sensor_default">50</string>
     <string name="sensor_pref_key">sensor_pref</string>
 
 
@@ -38,5 +38,6 @@
     <string name="rb_sms">SMS</string>
     <string name="drawer_open">Open Settings</string>
     <string name="drawer_close">Close Settings</string>
+    <string name="bt_connect">Connect to Device</string>
 
 </resources>

@@ -8,4 +8,28 @@
     <color name="buttonStopColor">#ff0800</color>
     <color name="textWhite">#ffffff</color>
     <color name="disabledButton">#949494</color>
+
+    <color name="YellowDark1">#939200</color>
+    <color name="YellowDark2">#A3A200</color>
+    <color name="YellowMedium">#E0DF00</color>
+    <color name="YellowFair1">#FFFD00</color>
+    <color name="YellowFair2">#FFFE75</color>
+
+    <color name="RedDark1">#AD1B00</color>
+    <color name="RedDark2">#DC2200</color>
+    <color name="RedMedium">#FF2800</color>
+    <color name="RedFair1">#FF4422</color>
+    <color name="RedFair2">#FF6447</color>
+
+    <color name="GreenDark1">#1D4A14</color>
+    <color name="GreenDark2">#2F6F22</color>
+    <color name="GreenMedium">#469535</color>
+    <color name="GreenFair1">#5DB94A</color>
+    <color name="GreenFair2">#76DA61</color>
+
+    <color name="GeneralDark1">#000000</color>
+    <color name="GeneralDark2">#171616</color>
+    <color name="GeneralMedium">#6A6968</color>
+    <color name="GeneralFair1">#9C9694</color>
+    <color name="GeneralFair2">#C0B5B3</color>
 </resources>
