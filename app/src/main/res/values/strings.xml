@@ -39,5 +39,9 @@
     <string name="drawer_open">Open Settings</string>
     <string name="drawer_close">Close Settings</string>
     <string name="bt_connect">Connect to Device</string>
+    <string name="btn_searchDevices">Add Device</string>
+    <string name="tv_devicesPaired">Devices Paired</string>
+    <string name="tv_devicesFound">Devices Found</string>
+    <string name="bt_dialog_message">Choose a device to add</string>
 
 </resources>

@@ -55,7 +55,8 @@
             android:text="@string/bt_connect"
             android:theme="@style/AppTheme.DarkActionBar"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:onClick="bluetoothActivityStart"/>
         <TextView
             android:layout_width="match_parent"
             android:height="50dp"
