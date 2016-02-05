@@ -1,6 +1,11 @@
 package com.example.levi.watchdog;
 
+import android.Manifest;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.bluetooth.BluetoothManager;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import  android.support.v4.app.DialogFragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -24,47 +29,50 @@ import java.util.Set;
 
 public class BluetoothActivity extends AppCompatActivity {
     private static BluetoothAdapter BTAdapter;
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
-    private static ArrayList<DeviceItem> deviceItemList;
+    private static ArrayList<DeviceItem> deviceItemList = new ArrayList<DeviceItem>();;
     private static ArrayList<DeviceItem> deviceSearched = new ArrayList<>();
 
     private static ArrayAdapter<DeviceItem> mPairedAdapter;
     private static ArrayAdapter<DeviceItem> mDiscoveredAdapter;
 
+    private ProgressDialog progressBar;
+    private  AlertDialog.Builder alertDialog;
 
     public static int REQUEST_BLUETOOTH = 1;
 
-    private  final BroadcastReceiver bReciever = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
-            {
-                Toast.makeText(getApplicationContext(), "Discovery Started", Toast.LENGTH_SHORT).show();
-            }
-            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
-                 {
-                    Toast.makeText(getApplicationContext(), "Discovery Finished", Toast.LENGTH_SHORT).show();
-                 }
-            if (BluetoothDevice.ACTION_FOUND.equals(action))
-                      {
-                            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                            // Create a new device item
-                            DeviceItem newDevice = new DeviceItem(device.getName(), device.getAddress(), "false");
-                            // Add it to our adapter
-                            Toast.makeText(getApplicationContext(), "Discovery Found Decies", Toast.LENGTH_SHORT).show();
-                            deviceSearched.add(newDevice);
-                            mDiscoveredAdapter.notifyDataSetChanged();
-                       }
-        }
-    };
+    public BroadcastReceiver bReciever;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bluetooth);
 
-        BTAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android M Permission check?
+            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("This app needs location access");
+                builder.setMessage("Please grant location access so this app can detect beacons.");
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener()
+                                             {
+                                                 @Override
+                                                 public void onDismiss(DialogInterface dialog)
+                                                 {
+                                                     requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+                                                 }
+                                             }
+                );
+                builder.show();
+            }
+            }
+
+        setContentView(R.layout.activity_bluetooth);
+        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+        BTAdapter = bluetoothManager.getAdapter();
         // Phone does not support Bluetooth so let the user know and exit.
         if (BTAdapter == null) {
             new AlertDialog.Builder(this)
@@ -79,22 +87,18 @@ public class BluetoothActivity extends AppCompatActivity {
                     .show();
         }
         if (!BTAdapter.isEnabled()) {
-            Intent enableBT = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBT, REQUEST_BLUETOOTH);
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            startActivity(discoverableIntent);
+
         }
-
-        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-        startActivity(discoverableIntent);
-
-
-        deviceItemList = new ArrayList<DeviceItem>();
 
         Set<BluetoothDevice> pairedDevices = BTAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
                 DeviceItem newDevice= new DeviceItem(device.getName(),device.getAddress(),"false");
                 deviceItemList.add(newDevice);
+
             }
         }
 
@@ -106,11 +110,36 @@ public class BluetoothActivity extends AppCompatActivity {
 
     public void addDevice(View view)
     {
+        progressBar = new ProgressDialog(this);
+        bReciever = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
+                {
+                    Toast.makeText(getApplicationContext(), "Discovery Started", Toast.LENGTH_SHORT).show();
+                }
+                else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
+                {
+                    Toast.makeText(getApplicationContext(), "Discovery Finished", Toast.LENGTH_SHORT).show();
+                }
+                if (BluetoothDevice.ACTION_FOUND.equals(action))
+                {
+                    progressBar.cancel();
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    // Create a new device item
+                    DeviceItem newDevice = new DeviceItem(device.getName(), device.getAddress(), "false");
+                    // Add it to our adapter
+                    Toast.makeText(getApplicationContext(), "Discovery Found Decies", Toast.LENGTH_SHORT).show();
+                    deviceSearched.add(newDevice);
+                    mDiscoveredAdapter.notifyDataSetChanged();
+                    alertDialog.show();
+                }
+            }
+        };
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(bReciever, filter);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        registerReceiver(bReciever, filter);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(bReciever, filter);
         mPairedAdapter.clear();
@@ -121,9 +150,11 @@ public class BluetoothActivity extends AppCompatActivity {
             BTAdapter.cancelDiscovery();
         }
         BTAdapter.startDiscovery();
+        progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressBar.show();
 
 
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(BluetoothActivity.this);
+       alertDialog = new AlertDialog.Builder(BluetoothActivity.this);
         alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
@@ -145,8 +176,34 @@ public class BluetoothActivity extends AppCompatActivity {
         mDiscoveredAdapter.add(di);*/
         devicesList.setAdapter(mDiscoveredAdapter);
 
-        alertDialog.show();
 
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_COARSE_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("PERMISSION BLUETOOTH", "coarse location permission granted");
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+
+                    });
+                    builder.show();
+                }
+                return;
+            }
+        }
     }
 
 }
