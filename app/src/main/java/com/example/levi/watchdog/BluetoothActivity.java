@@ -1,22 +1,20 @@
 package com.example.levi.watchdog;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothManager;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import  android.support.v4.app.DialogFragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,11 +32,11 @@ public class BluetoothActivity extends AppCompatActivity {
     private static ArrayList<DeviceItem> deviceItemList = new ArrayList<DeviceItem>();;
     private static ArrayList<DeviceItem> deviceSearched = new ArrayList<>();
 
-    private static ArrayAdapter<DeviceItem> mPairedAdapter;
+    private static PairedDevicesAdapter mPairedAdapter;
     private static ArrayAdapter<DeviceItem> mDiscoveredAdapter;
 
     private ProgressDialog progressBar;
-    private  AlertDialog.Builder alertDialog;
+    private  AlertDialog.Builder foundDevicesDialog;
 
     public static int REQUEST_BLUETOOTH = 1;
 
@@ -71,7 +69,9 @@ public class BluetoothActivity extends AppCompatActivity {
             }
 
         setContentView(R.layout.activity_bluetooth);
+
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+
         BTAdapter = bluetoothManager.getAdapter();
         // Phone does not support Bluetooth so let the user know and exit.
         if (BTAdapter == null) {
@@ -93,8 +93,11 @@ public class BluetoothActivity extends AppCompatActivity {
 
         }
 
+
+        mPairedAdapter = new PairedDevicesAdapter(this,R.layout.devices_list_item,deviceItemList);
         Set<BluetoothDevice> pairedDevices = BTAdapter.getBondedDevices();
-        if (pairedDevices.size() > 0) {
+        if ((pairedDevices.size() != mPairedAdapter.getCount())&&(pairedDevices.size()>0)) {
+            mPairedAdapter.clear();
             for (BluetoothDevice device : pairedDevices) {
                 DeviceItem newDevice= new DeviceItem(device.getName(),device.getAddress(),"false");
                 deviceItemList.add(newDevice);
@@ -102,11 +105,12 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         }
 
-        mPairedAdapter = new ArrayAdapter<DeviceItem>(this,R.layout.devices_list,deviceItemList);
+
         ListView listView = (ListView) findViewById(R.id.devices_list);
         listView.setAdapter(mPairedAdapter);
 
     }
+
 
     public void addDevice(View view)
     {
@@ -116,23 +120,25 @@ public class BluetoothActivity extends AppCompatActivity {
                 String action = intent.getAction();
                 if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
                 {
-                    Toast.makeText(getApplicationContext(), "Discovery Started", Toast.LENGTH_SHORT).show();
+                    progressBar.show();
                 }
                 else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
                 {
-                    Toast.makeText(getApplicationContext(), "Discovery Finished", Toast.LENGTH_SHORT).show();
+                    progressBar.cancel();
+                    foundDevicesDialog.show();
                 }
                 if (BluetoothDevice.ACTION_FOUND.equals(action))
                 {
                     progressBar.cancel();
+
+
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     // Create a new device item
                     DeviceItem newDevice = new DeviceItem(device.getName(), device.getAddress(), "false");
                     // Add it to our adapter
-                    Toast.makeText(getApplicationContext(), "Discovery Found Decies", Toast.LENGTH_SHORT).show();
                     deviceSearched.add(newDevice);
                     mDiscoveredAdapter.notifyDataSetChanged();
-                    alertDialog.show();
+
                 }
             }
         };
@@ -151,11 +157,11 @@ public class BluetoothActivity extends AppCompatActivity {
         }
         BTAdapter.startDiscovery();
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressBar.show();
+        progressBar.setTitle("Searching Devices...");
 
 
-       alertDialog = new AlertDialog.Builder(BluetoothActivity.this);
-        alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+        foundDevicesDialog = new AlertDialog.Builder(BluetoothActivity.this);
+        foundDevicesDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 unregisterReceiver(bReciever);
@@ -165,18 +171,16 @@ public class BluetoothActivity extends AppCompatActivity {
         });
         LayoutInflater inflater = getLayoutInflater();
         View convertView = (View) inflater.inflate(R.layout.discovered_devices, null);
-        alertDialog.setView(convertView);
+        foundDevicesDialog.setView(convertView);
 
-        alertDialog.setTitle(R.string.bt_dialog_message);
+        foundDevicesDialog.setTitle(R.string.bt_dialog_message);
         ListView devicesList = (ListView) convertView.findViewById(R.id.discovered_d);
 
-        mDiscoveredAdapter = new ArrayAdapter<DeviceItem>(this,R.layout.devices_list,deviceSearched);
+        mDiscoveredAdapter = new ArrayAdapter<DeviceItem>(this,R.layout.devices_list_item,deviceSearched);
 
        /*DeviceItem di = new DeviceItem("Levi","Levi","levi");
         mDiscoveredAdapter.add(di);*/
         devicesList.setAdapter(mDiscoveredAdapter);
-
-
 
     }
 
