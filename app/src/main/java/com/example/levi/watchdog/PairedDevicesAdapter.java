@@ -1,5 +1,7 @@
 package com.example.levi.watchdog;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,17 +16,18 @@ import java.util.List;
 /**
  * Created by Levi on 05/02/2016.
  */
-public class PairedDevicesAdapter extends ArrayAdapter<DeviceItem> {
+public class PairedDevicesAdapter extends ArrayAdapter<BluetoothDevice> {
 
     private static final String tag = "CountryArrayAdapter";
-    private static final String ASSETS_DIR = "images/";
+
+
     private Context context;
 
     private ImageView deviceIcon;
     private TextView deviceName;
-    private List<DeviceItem> devices = new ArrayList<DeviceItem>();
+    private List<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
 
-    public PairedDevicesAdapter(Context context, int resource, ArrayList<DeviceItem> objects) {
+    public PairedDevicesAdapter(Context context, int resource, ArrayList<BluetoothDevice> objects) {
         super(context, resource, objects);
 
         this.context = context;
@@ -36,7 +39,7 @@ public class PairedDevicesAdapter extends ArrayAdapter<DeviceItem> {
     }
 
 
-    public DeviceItem getItem(int index) {
+    public BluetoothDevice getItem(int index) {
         return this.devices.get(index);
     }
 
@@ -51,7 +54,7 @@ public class PairedDevicesAdapter extends ArrayAdapter<DeviceItem> {
         }
 
         // Get item
-        DeviceItem device = getItem(position);
+        BluetoothDevice device = getItem(position);
 
         // Get reference to ImageView
         deviceIcon = (ImageView) row.findViewById(R.id.deviceIcon);
@@ -61,14 +64,15 @@ public class PairedDevicesAdapter extends ArrayAdapter<DeviceItem> {
 
 
         //Set country name
-        deviceName.setText(device.getDeviceName());
+        deviceName.setText(device.getName());
 
         // Set country icon usign File path
        // String imgFilePath = ASSETS_DIR + country.resourceId;
 
            /* Bitmap bitmap = BitmapFactory.decodeStream(this.context.getResources().getAssets()
                     .open(imgFilePath));*/
-            deviceIcon.setImageResource(R.drawable.ic_drawer);
+        deviceIcon.setImageResource(R.drawable.bluetooth);
+
 
 
         return row;
