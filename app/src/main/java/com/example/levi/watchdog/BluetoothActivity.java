@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,27 +21,26 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.UUID;
+
 
 public class BluetoothActivity extends AppCompatActivity {
 
-    private static BluetoothAdapter BTAdapter;
+    private static BluetoothAdapter BTAdapter = BluetoothAdapter.getDefaultAdapter();
     public static int REQUEST_BLUETOOTH = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
-    private static UUID myUUID =  UUID.fromString("60b02ec4-c5a6-4eb4-bc25-02b69c361073");
     private static ArrayList<BluetoothDevice> deviceItemList = new ArrayList<BluetoothDevice>();;
-    private static ArrayList<BluetoothDevice> deviceSearched = new ArrayList<>();
-
-    private static ConnectThread connectDevice;
+    private static ArrayList<BluetoothDevice> deviceSearched = new ArrayList<BluetoothDevice>();
 
     private static PairedDevicesAdapter mPairedAdapter;
     private static PairedDevicesAdapter mDiscoveredAdapter;
     private static BluetoothDevice deviceToConnect;
+
+    private  static ConnectThread connectionService;
+
 
     public BroadcastReceiver bReciever = new BroadcastReceiver()
     {
@@ -51,31 +49,25 @@ public class BluetoothActivity extends AppCompatActivity {
             if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
             {
                 progressBar.show();
+                deviceSearched.clear();
+                mDiscoveredAdapter.clear();
             }
             else if (BluetoothDevice.ACTION_PAIRING_REQUEST.equals(action))
             {
                 foundDevicesDialog.dismiss();
 
             }
-            else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action))
-            {
-
-                inflatePairedDevicesList();
-
-            }
-            else if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(action))
-            {
-                Toast.makeText(getBaseContext(),"CONNECTED",
-                        Toast.LENGTH_SHORT).show();
-
-
-            }
             else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
             {
                 progressBar.cancel();
-                foundDevicesDialog.show();
 
-
+                if(deviceSearched.isEmpty())
+                {
+                    Toast.makeText(getApplicationContext(), "No New Devices Found", Toast.LENGTH_SHORT).show();
+                }else
+                {
+                    foundDevicesDialog.show();
+                }
             }
             if (BluetoothDevice.ACTION_FOUND.equals(action))
             {
@@ -86,10 +78,13 @@ public class BluetoothActivity extends AppCompatActivity {
                 int deviceType = classe.getDeviceClass();
 
 
-                if((deviceType != BluetoothClass.Device.PHONE_CELLULAR)&&(deviceType != BluetoothClass.Device.PHONE_SMART)) {
+                if((device.getBondState()!=BluetoothDevice.BOND_BONDED)&&(deviceType != BluetoothClass.Device.PHONE_CELLULAR)&&(deviceType != BluetoothClass.Device.PHONE_SMART)) {
                     // Add it to our adapter
-                    deviceSearched.add(device);
-                    mDiscoveredAdapter.notifyDataSetChanged();
+                    if(!deviceSearched.contains(device))
+                    {
+                        deviceSearched.add(device);
+                        mDiscoveredAdapter.notifyDataSetChanged();
+                    }
                 }
 
             }
@@ -98,9 +93,15 @@ public class BluetoothActivity extends AppCompatActivity {
 
 
     private ProgressDialog progressBar;
-    private AlertDialog.Builder foundDevicesBuilder = new AlertDialog.Builder(BluetoothActivity.this);;
+    private AlertDialog.Builder foundDevicesBuilder ;
     private AlertDialog foundDevicesDialog;
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +130,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_bluetooth);
         setUpBluetooth();
+
 
     }
 
@@ -185,7 +187,7 @@ public class BluetoothActivity extends AppCompatActivity {
         progressBar.setTitle("Searching Devices...");
 
 
-
+        foundDevicesBuilder = new AlertDialog.Builder(BluetoothActivity.this);
         foundDevicesBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
@@ -236,9 +238,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
     private void setUpBluetooth()
     {
-        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
 
-        BTAdapter = bluetoothManager.getAdapter();
         // Phone does not support Bluetooth so let the user know and exit.
         if (BTAdapter == null) {
             new AlertDialog.Builder(this)
@@ -270,7 +270,11 @@ public class BluetoothActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 deviceToConnect = mPairedAdapter.getItem(position);
+                connectionService = new ConnectThread(deviceToConnect,BTAdapter);
+                connectionService.start();
 
+
+                byte[] bytes = {Byte.parseByte("127"),Byte.parseByte("127")};
             }
         });
 
@@ -295,6 +299,4 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         }
     }
-
-
 }

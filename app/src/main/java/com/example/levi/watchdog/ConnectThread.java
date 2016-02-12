@@ -1,6 +1,5 @@
-package com.example.levi.watchdog; /**
- * Created by Vini on 11/02/2016.
- */
+package com.example.levi.watchdog;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -10,53 +9,57 @@ import java.io.IOException;
 import java.util.UUID;
 
 /**
- * Created by User on 6/3/2015.
+ * Created by Vini on 12/02/2016.
  */
-public class ConnectThread extends Thread{
+public class ConnectThread extends Thread {
+    private final BluetoothSocket mmSocket;
+    private final BluetoothDevice mmDevice;
+    private static UUID myUUID =  UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private  static ConnectedThread manageConnection;
     private static BluetoothAdapter BTAdapter;
-    private final BluetoothDevice bTDevice;
-    private final BluetoothSocket bTSocket;
 
-    public ConnectThread(BluetoothDevice bTDevice, UUID UUID, BluetoothAdapter adapter) {
+
+    public ConnectThread(BluetoothDevice device, BluetoothAdapter BTAdapter) {
+        // Use a temporary object that is later assigned to mmSocket,
+        // because mmSocket is final
+        Log.d("ConnectThread", "Entered Connect Thread");
         BluetoothSocket tmp = null;
-        this.bTDevice = bTDevice;
-        this.BTAdapter = adapter;
+        mmDevice = device;
+        this.BTAdapter = BTAdapter;
+
+        // Get a BluetoothSocket to connect with the given BluetoothDevice
         try {
-            tmp = this.bTDevice.createRfcommSocketToServiceRecord(UUID);
-        }
-        catch (IOException e) {
-            Log.d("CONNECTTHREAD", "Could not start listening for RFCOMM");
-        }
-        bTSocket = tmp;
+            // MY_UUID is the app's UUID string, also used by the server code
+            tmp = device.createRfcommSocketToServiceRecord(myUUID);
+        } catch (IOException e) { }
+        mmSocket = tmp;
     }
 
     public void run() {
-
+        // Cancel discovery because it will slow down the connection
         BTAdapter.cancelDiscovery();
 
         try {
             // Connect the device through the socket. This will block
             // until it succeeds or throws an exception
-            bTSocket.connect();
+            mmSocket.connect();
         } catch (IOException connectException) {
             // Unable to connect; close the socket and get out
             try {
-                bTSocket.close();
+                mmSocket.close();
             } catch (IOException closeException) { }
             return;
         }
-
+        Log.d("ConnectThread","Socket Created");
         // Do work to manage the connection (in a separate thread)
-        //manageConnectedSocket(bTSocket);
+        manageConnection = new ConnectedThread(mmSocket);
+        manageConnection.start();
     }
 
-    public boolean cancel() {
+    /** Will cancel an in-progress connection, and close the socket */
+    public void cancel() {
         try {
-            bTSocket.close();
-        } catch(IOException e) {
-            return false;
-        }
-        return true;
+            mmSocket.close();
+        } catch (IOException e) { }
     }
-
 }
