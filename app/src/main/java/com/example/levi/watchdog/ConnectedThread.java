@@ -3,8 +3,10 @@ package com.example.levi.watchdog;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 /**
@@ -33,15 +35,25 @@ public class ConnectedThread extends Thread {
     }
 
     public void run() {
-        byte[] buffer = new byte[1024];  // buffer store for the stream
-        //int bytes; // bytes returned from read()
+        char[] buffer = new char[16];  // buffer store for the stream
+        int bytes = 0; // bytes returned from read()
+        int offset = 0;
+        int buffCount = 16;
 
         // Keep listening to the InputStream until an exception occurs
         while (true) {
             try {
-                // Read from the InputStream
-               int  bytes = mmInStream.read(buffer);
-                Log.d("FROMARDUINO",bytes+" ");
+
+
+                BufferedReader r = new BufferedReader(new InputStreamReader(mmInStream));
+                bytes= r.read(buffer,offset,buffCount);
+
+
+                    if(buffer[1]==0x01)
+                    {
+                        Log.d("ConnectedThread","Received Keep Alive Command");
+                    }
+
                 // Send the obtained bytes to the UI activity
                     /*mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();*/

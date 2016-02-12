@@ -57,6 +57,16 @@ public class BluetoothActivity extends AppCompatActivity {
                 foundDevicesDialog.dismiss();
 
             }
+            else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action))
+            {
+                Toast.makeText(getApplicationContext(), "Device Connected", Toast.LENGTH_SHORT).show();
+
+            }
+            else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action))
+            {
+                Toast.makeText(getApplicationContext(), "Device Disconnected", Toast.LENGTH_SHORT).show();
+
+            }
             else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
             {
                 progressBar.cancel();
@@ -171,8 +181,9 @@ public class BluetoothActivity extends AppCompatActivity {
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
-        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+
 
         registerReceiver(bReciever, filter);
 
