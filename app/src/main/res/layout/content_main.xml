@@ -21,6 +21,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_margin="4dp"
+            android:enabled="false"
             android:layout_height="match_parent"
             android:text="@string/button_start_watch"
             android:textColor="@color/textWhite"
@@ -29,6 +30,7 @@
             android:layout_weight="1"/>
         <Button
             android:layout_margin="4dp"
+            android:enabled="false"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/button_pause_watch"
@@ -37,6 +39,7 @@
             android:layout_weight="1"/>
         <Button
             android:layout_margin="4dp"
+            android:enabled="false"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/button_stop_watch"
@@ -45,12 +48,14 @@
             android:layout_weight="1"/>
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:paddingTop="16dp"
-        android:layout_weight="2">
+        android:layout_weight="2"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true">
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,7 +63,15 @@
             android:text="@string/bt_connect"
             android:theme="@style/AppTheme.DarkActionBar"
             android:onClick="bluetoothActivityStart"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true" />
-    </RelativeLayout>
+            android:layout_weight="0"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="New Text"
+            android:id="@+id/tvMessage"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="1"/>
+    </LinearLayout>
 </LinearLayout>

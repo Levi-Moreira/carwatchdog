@@ -1,21 +1,19 @@
 package com.example.levi.watchdog;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,16 +22,16 @@ import android.widget.Toast;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.logging.Handler;
 
 
 public class BluetoothActivity extends AppCompatActivity {
 
     private static BluetoothAdapter BTAdapter = BluetoothAdapter.getDefaultAdapter();
-    public static int REQUEST_BLUETOOTH = 1;
-    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
-    private static ArrayList<BluetoothDevice> deviceItemList = new ArrayList<BluetoothDevice>();;
-    private static ArrayList<BluetoothDevice> deviceSearched = new ArrayList<BluetoothDevice>();
+
+    private static ArrayList<BluetoothDevice> pairedDeviceArray = new ArrayList<BluetoothDevice>();;
+    private static ArrayList<BluetoothDevice> discoveredDeviceArray = new ArrayList<BluetoothDevice>();
 
     private static PairedDevicesAdapter mPairedAdapter;
     private static PairedDevicesAdapter mDiscoveredAdapter;
@@ -49,7 +47,7 @@ public class BluetoothActivity extends AppCompatActivity {
             if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
             {
                 progressBar.show();
-                deviceSearched.clear();
+                discoveredDeviceArray.clear();
                 mDiscoveredAdapter.clear();
             }
             else if (BluetoothDevice.ACTION_PAIRING_REQUEST.equals(action))
@@ -59,19 +57,14 @@ public class BluetoothActivity extends AppCompatActivity {
             }
             else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action))
             {
-                Toast.makeText(getApplicationContext(), "Device Connected", Toast.LENGTH_SHORT).show();
-
-            }
-            else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action))
-            {
-                Toast.makeText(getApplicationContext(), "Device Disconnected", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "CONNECTED!!!", Toast.LENGTH_SHORT).show();
 
             }
             else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
             {
                 progressBar.cancel();
 
-                if(deviceSearched.isEmpty())
+                if(discoveredDeviceArray.isEmpty())
                 {
                     Toast.makeText(getApplicationContext(), "No New Devices Found", Toast.LENGTH_SHORT).show();
                 }else
@@ -90,9 +83,9 @@ public class BluetoothActivity extends AppCompatActivity {
 
                 if((device.getBondState()!=BluetoothDevice.BOND_BONDED)&&(deviceType != BluetoothClass.Device.PHONE_CELLULAR)&&(deviceType != BluetoothClass.Device.PHONE_SMART)) {
                     // Add it to our adapter
-                    if(!deviceSearched.contains(device))
+                    if(!discoveredDeviceArray.contains(device))
                     {
-                        deviceSearched.add(device);
+                        discoveredDeviceArray.add(device);
                         mDiscoveredAdapter.notifyDataSetChanged();
                     }
                 }
@@ -103,6 +96,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
 
     private ProgressDialog progressBar;
+    private ProgressDialog connectingProgressBar;
     private AlertDialog.Builder foundDevicesBuilder ;
     private AlertDialog foundDevicesDialog;
 
@@ -117,57 +111,12 @@ public class BluetoothActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Android M Permission check?
-            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("This app needs location access");
-                builder.setMessage("Please grant location access so this app can detect beacons.");
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(new DialogInterface.OnDismissListener()
-                                             {
-                                                 @Override
-                                                 public void onDismiss(DialogInterface dialog)
-                                                 {
-                                                     requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
-                                                 }
-                                             }
-                );
-                builder.show();
-            }
-            }
+
 
         setContentView(R.layout.activity_bluetooth);
-        setUpBluetooth();
+        inflatePairedDevicesList();
 
 
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_COARSE_LOCATION: {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d("PERMISSION BLUETOOTH", "coarse location permission granted");
-                } else {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle("Functionality limited");
-                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                        }
-
-                    });
-                    builder.show();
-                }
-                return;
-            }
-        }
     }
 
 
@@ -182,9 +131,6 @@ public class BluetoothActivity extends AppCompatActivity {
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-
-
         registerReceiver(bReciever, filter);
 
 
@@ -232,7 +178,7 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         });
 
-        mDiscoveredAdapter = new PairedDevicesAdapter(this,R.layout.devices_list_item,deviceSearched);
+        mDiscoveredAdapter = new PairedDevicesAdapter(this,R.layout.devices_list_item, discoveredDeviceArray);
         foundDevicesList.setAdapter(mDiscoveredAdapter);
 
     }
@@ -247,34 +193,12 @@ public class BluetoothActivity extends AppCompatActivity {
         }
     }
 
-    private void setUpBluetooth()
-    {
-
-        // Phone does not support Bluetooth so let the user know and exit.
-        if (BTAdapter == null) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Not compatible")
-                    .setMessage("Your phone does not support Bluetooth")
-                    .setPositiveButton("Exit", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            System.exit(0);
-                        }
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
-        }
-
-        if (!BTAdapter.isEnabled()) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
-
-        }
 
 
-        mPairedAdapter = new PairedDevicesAdapter(this,R.layout.devices_list_item,deviceItemList);
-        inflatePairedDevicesList();
+    private void inflatePairedDevicesList() {
 
+       mPairedAdapter = new PairedDevicesAdapter(this,R.layout.devices_list_item, pairedDeviceArray);
+       connectingProgressBar= new ProgressDialog(this);
 
         ListView pairedDevicesList = (ListView) findViewById(R.id.devices_list);
         pairedDevicesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -284,15 +208,14 @@ public class BluetoothActivity extends AppCompatActivity {
                 connectionService = new ConnectThread(deviceToConnect,BTAdapter);
                 connectionService.start();
 
+                connectingProgressBar.setTitle("Connecting to Device: " + deviceToConnect.getName());
+                new ConnectTask().execute();
 
-                byte[] bytes = {Byte.parseByte("127"),Byte.parseByte("127")};
             }
         });
 
         pairedDevicesList.setAdapter(mPairedAdapter);
-    }
 
-    private void inflatePairedDevicesList() {
         Set<BluetoothDevice> pairedDevices = BTAdapter.getBondedDevices();
         if ((pairedDevices.size() != mPairedAdapter.getCount())&&(pairedDevices.size()>0)) {
             mPairedAdapter.clear();
@@ -303,11 +226,55 @@ public class BluetoothActivity extends AppCompatActivity {
                 if((deviceClass != BluetoothClass.Device.PHONE_CELLULAR)&&(deviceClass != BluetoothClass.Device.PHONE_SMART))
                 {
 
-                    deviceItemList.add(device);
+                    pairedDeviceArray.add(device);
                     mPairedAdapter.notifyDataSetChanged();
                 }
 
             }
+        }
+    }
+
+    public class ConnectTask extends AsyncTask <Void,Void,Void>
+    {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            connectingProgressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            connectingProgressBar.show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if(connectionService.getmConnectionStatus()==1)
+            {
+
+                connectingProgressBar.dismiss();
+                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                intent.putExtra("connectedDeviceAddress", connectionService.getMmDevice());
+
+
+                startActivity(intent);
+
+
+            }
+            else if(connectionService.getmConnectionStatus()==2)
+            {
+                Toast.makeText(getApplicationContext(), "Connection Error", Toast.LENGTH_SHORT).show();
+                connectingProgressBar.dismiss();
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+
+            while((connectionService.getmConnectionStatus()==0)&&(connectionService.getmConnectionStatus()!=2))
+            {
+
+            }
+            return null;
         }
     }
 }

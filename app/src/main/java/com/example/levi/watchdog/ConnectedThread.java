@@ -16,9 +16,12 @@ public class ConnectedThread extends Thread {
     private final BluetoothSocket mmSocket;
     private final InputStream mmInStream;
     private final OutputStream mmOutStream;
+    char[] mReceiveBuffer = new char[16];  // mReceiveBuffer store for the stream
+    int mReceiveBytes = 0; // mReceiveBytes returned from read()
 
     public ConnectedThread(BluetoothSocket socket) {
         Log.d("ConnectThread", "Connected");
+
         mmSocket = socket;
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
@@ -35,8 +38,8 @@ public class ConnectedThread extends Thread {
     }
 
     public void run() {
-        char[] buffer = new char[16];  // buffer store for the stream
-        int bytes = 0; // bytes returned from read()
+        mReceiveBuffer = new char[16];  // mReceiveBuffer store for the stream
+        mReceiveBytes = 0; // mReceiveBytes returned from read()
         int offset = 0;
         int buffCount = 16;
 
@@ -46,16 +49,16 @@ public class ConnectedThread extends Thread {
 
 
                 BufferedReader r = new BufferedReader(new InputStreamReader(mmInStream));
-                bytes= r.read(buffer,offset,buffCount);
+                mReceiveBytes = r.read(mReceiveBuffer,offset,buffCount);
 
 
-                    if(buffer[1]==0x01)
+                    if(mReceiveBuffer[1]==0x01)
                     {
                         Log.d("ConnectedThread","Received Keep Alive Command");
                     }
 
-                // Send the obtained bytes to the UI activity
-                    /*mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
+                // Send the obtained mReceiveBytes to the UI activity
+                    /*mHandler.obtainMessage(MESSAGE_READ, mReceiveBytes, -1, mReceiveBuffer)
                             .sendToTarget();*/
             } catch (IOException e) {
                 break;
