@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
             Cmd[1] = 0X02;
             Cmd[2] = (byte)( Integer.parseInt(password)>>8);
             Cmd[3] = (byte)( Integer.parseInt(password));
+
            connectionManager.write(Cmd);
         }
     }
