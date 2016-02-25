@@ -4,10 +4,12 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 /**
  * Created by Vini on 12/02/2016.
@@ -69,6 +71,7 @@ public class ConnectedThread extends Thread {
     /* Call this from the main activity to send data to the remote device */
     public void write(byte[] bytes) {
         try {
+
             mmOutStream.write(bytes);
         } catch (IOException e) { }
     }

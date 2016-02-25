@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
 
-
-
+    private static byte[] Cmd = {0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00};
+    SharedPreferences preferences;
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         btStart = (Button)findViewById(R.id.button_start_watch);
         btPause = (Button)findViewById(R.id.button_pause_watch);
         btStop = (Button)findViewById(R.id.button_stop_watch);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     public void bluetoothActivityStart(View view)
@@ -57,6 +60,20 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, BluetoothActivity.class);
         startActivity(intent);
 
+    }
+
+
+    public void startWatch(View view)
+    {
+        if(connectionManager!=null)
+        {
+            String password = preferences.getString(getString(R.string.password_pref_key),getString(R.string.pref_setting_password_default));
+
+            Cmd[1] = 0X02;
+            Cmd[2] = (byte)( Integer.parseInt(password)>>8);
+            Cmd[3] = (byte)( Integer.parseInt(password));
+           connectionManager.write(Cmd);
+        }
     }
 
     @Override

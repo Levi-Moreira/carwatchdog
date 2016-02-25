@@ -27,6 +27,7 @@
             android:textColor="@color/textWhite"
             android:id="@+id/button_start_watch"
             android:background="@drawable/button_green"
+            android:onClick="startWatch"
             android:layout_weight="1"/>
         <Button
             android:layout_margin="4dp"
