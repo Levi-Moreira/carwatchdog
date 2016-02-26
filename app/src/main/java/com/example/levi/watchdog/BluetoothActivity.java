@@ -10,10 +10,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -29,7 +31,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
     private static BluetoothAdapter BTAdapter = BluetoothAdapter.getDefaultAdapter();
 
-
+    SharedPreferences preferences;
     private static ArrayList<BluetoothDevice> pairedDeviceArray = new ArrayList<BluetoothDevice>();;
     private static ArrayList<BluetoothDevice> discoveredDeviceArray = new ArrayList<BluetoothDevice>();
 
@@ -38,7 +40,9 @@ public class BluetoothActivity extends AppCompatActivity {
     private static BluetoothDevice deviceToConnect;
 
     private  static ConnectThread connectionService;
+    private  static ConnectedThread connectionManager;
 
+    private static byte[] Cmd = {0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00};
 
     public BroadcastReceiver bReciever = new BroadcastReceiver()
     {
@@ -234,6 +238,12 @@ public class BluetoothActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    }
+
     public class ConnectTask extends AsyncTask <Void,Void,Void>
     {
 
@@ -251,10 +261,16 @@ public class BluetoothActivity extends AppCompatActivity {
             {
 
                 connectingProgressBar.dismiss();
+
+                connectionManager = connectionService.getManageConnection();
+                String password = preferences.getString(getString(R.string.password_pref_key),getString(R.string.pref_setting_password_default));
+                Cmd[1] = 0X10;
+                Cmd[2] = (byte)( Integer.parseInt(password)>>8);
+                Cmd[3] = (byte)( Integer.parseInt(password));
+                connectionManager.write(Cmd);
+
                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                 intent.putExtra("connectedDeviceAddress", connectionService.getMmDevice());
-
-
                 startActivity(intent);
 
 
