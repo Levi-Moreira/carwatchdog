@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
 
-    private static byte[] Cmd = {0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00};
+    private static byte[] Cmd = {0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00};
     SharedPreferences preferences;
 
     @Override

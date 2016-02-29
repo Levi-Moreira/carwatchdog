@@ -42,7 +42,7 @@ public class BluetoothActivity extends AppCompatActivity {
     private  static ConnectThread connectionService;
     private  static ConnectedThread connectionManager;
 
-    private static byte[] Cmd = {0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00};
+    private static byte[] Cmd = {0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00};
 
     public BroadcastReceiver bReciever = new BroadcastReceiver()
     {
