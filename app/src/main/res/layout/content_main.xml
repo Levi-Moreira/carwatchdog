@@ -37,6 +37,7 @@
             android:text="@string/button_pause_watch"
             android:id="@+id/button_pause_watch"
             android:background="@drawable/button_yellow"
+            android:onClick="pauseWatch"
             android:layout_weight="1"/>
         <Button
             android:layout_margin="4dp"
@@ -46,6 +47,7 @@
             android:text="@string/button_stop_watch"
             android:id="@+id/button_stop_watch"
             android:background="@drawable/button_red"
+            android:onClick="stopWatch"
             android:layout_weight="1"/>
     </LinearLayout>
 

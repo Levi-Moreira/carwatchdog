@@ -69,11 +69,49 @@ public class MainActivity extends AppCompatActivity {
         {
             String password = preferences.getString(getString(R.string.password_pref_key),getString(R.string.pref_setting_password_default));
 
-            Cmd[1] = 0X02;
+            Cmd[1] = 0X03;
             Cmd[2] = (byte)( Integer.parseInt(password)>>8);
             Cmd[3] = (byte)( Integer.parseInt(password));
 
            connectionManager.write(Cmd);
+            btPause.setEnabled(true);
+            btStop.setEnabled(true);
+            btStart.setEnabled(false);
+
+        }
+    }
+
+    public void pauseWatch(View view)
+    {
+        if(connectionManager!=null)
+        {
+            String password = preferences.getString(getString(R.string.password_pref_key),getString(R.string.pref_setting_password_default));
+
+            Cmd[1] = 0X04;
+            Cmd[2] = (byte)( Integer.parseInt(password)>>8);
+            Cmd[3] = (byte)( Integer.parseInt(password));
+
+            connectionManager.write(Cmd);
+            btPause.setEnabled(false);
+            btStart.setEnabled(true);
+
+        }
+    }
+
+    public void stopWatch(View view)
+    {
+        if(connectionManager!=null)
+        {
+            String password = preferences.getString(getString(R.string.password_pref_key),getString(R.string.pref_setting_password_default));
+
+            Cmd[1] = 0X05;
+            Cmd[2] = (byte)( Integer.parseInt(password)>>8);
+            Cmd[3] = (byte)( Integer.parseInt(password));
+
+            connectionManager.write(Cmd);
+            btStart.setEnabled(true);
+            btPause.setEnabled(false);
+            btStop.setEnabled(false);
         }
     }
 

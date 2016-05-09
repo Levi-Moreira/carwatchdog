@@ -21,6 +21,18 @@ public class ConnectedThread extends Thread {
     char[] mReceiveBuffer = new char[16];  // mReceiveBuffer store for the stream
     int mReceiveBytes = 0; // mReceiveBytes returned from read()
 
+    public char[] getReceivedData() {
+        return mReceiveBuffer;
+    }
+
+    public int getReceivedDataAmount() {
+        return mReceiveBytes;
+    }
+
+    public void setmReceiveBytes(int mReceiveBytes) {
+        this.mReceiveBytes = mReceiveBytes;
+    }
+
     public ConnectedThread(BluetoothSocket socket) {
         Log.d("ConnectThread", "Connected");
 
@@ -40,16 +52,16 @@ public class ConnectedThread extends Thread {
     }
 
     public void run() {
-        mReceiveBuffer = new char[16];  // mReceiveBuffer store for the stream
+        mReceiveBuffer = new char[18];  // mReceiveBuffer store for the stream
         mReceiveBytes = 0; // mReceiveBytes returned from read()
         int offset = 0;
-        int buffCount = 16;
+        int buffCount = 18;
 
         // Keep listening to the InputStream until an exception occurs
         while (true) {
-            try {
+          /*  try {
 
-
+               mReceiveBytes = 0;
                 BufferedReader r = new BufferedReader(new InputStreamReader(mmInStream));
                 mReceiveBytes = r.read(mReceiveBuffer,offset,buffCount);
 
@@ -59,12 +71,13 @@ public class ConnectedThread extends Thread {
                         Log.d("ConnectedThread","Received Keep Alive Command");
                     }
 
-                // Send the obtained mReceiveBytes to the UI activity
-                    /*mHandler.obtainMessage(MESSAGE_READ, mReceiveBytes, -1, mReceiveBuffer)
-                            .sendToTarget();*/
+                    if(mReceiveBuffer[1]==0x02)
+                    {
+                        Log.d("ConnectedThread","AckOK");
+                    }
             } catch (IOException e) {
                 break;
-            }
+            }*/
         }
     }
 
@@ -81,5 +94,20 @@ public class ConnectedThread extends Thread {
         try {
             mmSocket.close();
         } catch (IOException e) { }
+    }
+
+    public char[] read()
+    {
+        mReceiveBuffer = new char[18];  // mReceiveBuffer store for the stream
+        mReceiveBytes = 0; // mReceiveBytes returned from read()
+        int offset = 0;
+        int buffCount = 18;
+
+        try {
+            mReceiveBytes = 0;
+            BufferedReader r = new BufferedReader(new InputStreamReader(mmInStream));
+            mReceiveBytes = r.read(mReceiveBuffer,offset,buffCount);
+            return mReceiveBuffer;
+        }catch (IOException e) { return null;}
     }
 }

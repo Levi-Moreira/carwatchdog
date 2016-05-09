@@ -36,7 +36,7 @@ public class ConnectThread extends Thread  {
     public ConnectThread(BluetoothDevice device, BluetoothAdapter BTAdapter) {
         // Use a temporary object that is later assigned to mmSocket,
         // because mmSocket is final
-        Log.d("ConnectThread", "Entered Connect Thread");
+        //Log.d("ConnectThread", "Entered Connect Thread");
         mConnectionStatus = 0;
         BluetoothSocket tmp = null;
         mmDevice = device;
