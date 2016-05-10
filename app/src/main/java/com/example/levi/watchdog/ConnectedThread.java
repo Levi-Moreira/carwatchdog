@@ -78,7 +78,23 @@ public class ConnectedThread extends Thread {
                    }
 
                    if (mReceiveBuffer[1] == 0x02) {
-                       Log.d("ConnectedThread", "AckOK");
+
+                       switch (mReceiveBuffer[0])
+                       {
+                           case 0x10:
+                               Log.d("ConnectedThread", "AckOK-Connection");
+                               break;
+                           case 0x03:
+                               Log.d("ConnectedThread", "AckOK-StartWatch");
+                               break;
+                           case 0x04:
+                               Log.d("ConnectedThread", "AckOK-PauseWatch");
+                               break;
+                           case 0x05:
+                               Log.d("ConnectedThread", "AckOK - Stop Watch");
+                               break;
+
+                       }
                    }
                }
             } catch (IOException e) {
