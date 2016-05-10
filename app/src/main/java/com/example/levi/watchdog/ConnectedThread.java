@@ -56,28 +56,34 @@ public class ConnectedThread extends Thread {
         mReceiveBytes = 0; // mReceiveBytes returned from read()
         int offset = 0;
         int buffCount = 18;
-
+        char receivedByte;
         // Keep listening to the InputStream until an exception occurs
         while (true) {
-          /*  try {
-
-               mReceiveBytes = 0;
-                BufferedReader r = new BufferedReader(new InputStreamReader(mmInStream));
-                mReceiveBytes = r.read(mReceiveBuffer,offset,buffCount);
 
 
-                    if(mReceiveBuffer[1]==0x01)
-                    {
-                        Log.d("ConnectedThread","Received Keep Alive Command");
-                    }
+           try {
 
-                    if(mReceiveBuffer[1]==0x02)
-                    {
-                        Log.d("ConnectedThread","AckOK");
-                    }
+                mReceiveBytes = 0;
+                offset = 0;
+               do {
+
+                   BufferedReader r = new BufferedReader(new InputStreamReader(mmInStream));
+                   mReceiveBytes= r.read(mReceiveBuffer, offset, buffCount-offset);
+                   offset+=mReceiveBytes;
+               }while ((offset!=buffCount)&&(mReceiveBytes!=0));
+
+               if(mReceiveBytes!=0) {
+                   if (mReceiveBuffer[1] == 0x01) {
+                       Log.d("ConnectedThread", "Received Keep Alive Command");
+                   }
+
+                   if (mReceiveBuffer[1] == 0x02) {
+                       Log.d("ConnectedThread", "AckOK");
+                   }
+               }
             } catch (IOException e) {
                 break;
-            }*/
+            }
         }
     }
 
@@ -94,20 +100,5 @@ public class ConnectedThread extends Thread {
         try {
             mmSocket.close();
         } catch (IOException e) { }
-    }
-
-    public char[] read()
-    {
-        mReceiveBuffer = new char[18];  // mReceiveBuffer store for the stream
-        mReceiveBytes = 0; // mReceiveBytes returned from read()
-        int offset = 0;
-        int buffCount = 18;
-
-        try {
-            mReceiveBytes = 0;
-            BufferedReader r = new BufferedReader(new InputStreamReader(mmInStream));
-            mReceiveBytes = r.read(mReceiveBuffer,offset,buffCount);
-            return mReceiveBuffer;
-        }catch (IOException e) { return null;}
     }
 }
